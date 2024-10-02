@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+from slack_sdk import WebClient
 from core.sshmikrotik import send_command_to_device_mikrotik
 from datetime import datetime
 
@@ -47,7 +48,7 @@ def run_on(message,say):
         # Filter data 
         slack_message = text.split('-')
         unecesasary = slack_message[0].split(' ')
-        unecesasary.remove("!mcli")
+        unecesasary.remove(event_message)
         unecesasary.remove("run")
 
         # Set the rest
@@ -66,6 +67,9 @@ def run_on(message,say):
     
     except Exception as e:
         say(f"Error in mesg: {str(e)}")
+
+@app.message(event_message + "load")
+def load_file_configuration(ack, body, client: WebClient)
 
 @app.message(event_message)
 def help(say):
