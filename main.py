@@ -1,17 +1,29 @@
-import os
-from dotenv import load_dotenv
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
-from slack_sdk import WebClient
-from core.sshmikrotik import send_command_to_device_mikrotik
-from datetime import datetime
+# Author: Erick Alejandro Graterol
+# Bot: netoolkit
+# Description: toolkit to working on routers, backups-files and text
 
+# Third-part and natives
+import os
+from slack_bolt import App
+from datetime import datetime
+from slack_sdk import WebClient
+from slack_bolt.adapter.socket_mode import SocketModeHandler
+
+# Local vars and classes
+from core.sshmikrotik import send_command_to_device_mikrotik
+from core.config.paths import folder_of_backups_file
+from core.helpers.file_management import SEARCH
+from core.helpers.file_management import READ
+
+# Init APP
 app = App(token=os.getenv("SLACK_BOT_TOKEN"))
+client = WebClient(token=os.getenv("SLACK_BOT_TOKEN"))
 slack_secret = os.getenv("SLACK_SIGNING_SECRET")                        
 event_message = "!kit " # Don't remove space blank
 
+
 @app.message(event_message + "test")
-def test(message,say):
+def test_run(message, say):
     try:
         # Parser message
         text = message['text']
@@ -38,9 +50,38 @@ def test(message,say):
     except Exception as e:
         say(f"Error in mesg: {str(e)}")
 
+@app.message(event_message + "load")
+def test_upload(message, say, body):
+
+    text = message['text']
+    slack_message = text.split(' ', 2)
+    slack_message.remove("!kit") # Remove command
+    slack_message.pop(0) # Remove flag and just take message of slack
+
+    filename_get_from_slack = slack_message[0] + ".txt"
+
+    find_file = SEARCH.file_in_folder(folder_of_backups_file, filename_get_from_slack)
+    print(find_file)
+    if find_file:
+        new_file = client.files_upload_v2(
+            title = "Backup File",
+            filename = f"{filename_get_from_slack}",
+            content = f"{READ.txt_file(f'{folder_of_backups_file}/{filename_get_from_slack}')}",
+        )
+
+        file_url = new_file.get("file").get("permalink")
+        new_message = client.chat_postMessage(
+            channel = f"{body['event']['channel']}",
+            text = f"Your File here {file_url}"
+        )
+
+    else:
+        say("```🟥 Not found your file```")
+
+
 
 @app.message(event_message + "run")
-def run_on(message,say):
+def run_on(message, say):
     try:
         # Parser message
         text = message['text']
@@ -69,7 +110,32 @@ def run_on(message,say):
         say(f"Error in mesg: {str(e)}")
 
 @app.message(event_message + "load")
-def load_file_configuration(ack, body, client: WebClient)
+def load_file_configuration(message, say, body):
+    text = message['text']
+    slack_message = text.split(' ', 2)
+    slack_message.remove("!kit") # Remove command
+    slack_message.pop(0) # Remove flag and just take message of slack
+
+    filename_get_from_slack = slack_message[0] + ".txt"
+
+    find_file = SEARCH.file_in_folder(folder_of_backups_file, filename_get_from_slack)
+    print(find_file)
+    if find_file:
+        new_file = client.files_upload_v2(
+            title = "Backup File",
+            filename = f"{filename_get_from_slack}",
+            content = f"{READ.txt_file(f'{folder_of_backups_file}/{filename_get_from_slack}')}",
+        )
+
+        file_url = new_file.get("file").get("permalink")
+        new_message = client.chat_postMessage(
+            channel = f"{body['event']['channel']}",
+            text = f"Your File here {file_url}"
+        )
+
+    else:
+        say("```🟥 Not found your file```")
+
 
 @app.message(event_message)
 def help(say):
@@ -88,9 +154,9 @@ def help(say):
     except Exception as e:
         say(f"Error in mesg {str(e)}")
 
+
 if __name__ == "__main__":
-    try:
-            
+    try:            
         handler = SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
         handler.start()
 
