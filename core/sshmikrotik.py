@@ -77,13 +77,12 @@ def second_check_if_command_is_dangerous(command_str:str) -> bool:
         
     return False
 
-
 def send_command_to_device_mikrotik(ip:str, command:str):
     mikrotik = {
         'device_type': 'mikrotik_routeros',
         'host': ip,
         'username': 'admin',
-        'password': 'S0m0s_2021',
+        'password': '',
     }
 
     first_check = first_check_if_command_is_dangerous(command)
