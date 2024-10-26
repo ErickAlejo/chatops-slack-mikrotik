@@ -31,7 +31,7 @@ def test_run(message, say):
         # Filter data 
         slack_message = text.split('-')
         unecesasary = slack_message[0].split(' ')
-        unecesasary.remove("!mcli")
+        unecesasary.remove("!kit")
         unecesasary.remove("test")
 
         # Set the rest
@@ -43,7 +43,7 @@ def test_run(message, say):
             'host': ip_address,
             'command': command,
             'username': 'admin',
-            'password': 'YOUR_PASSW',
+            'password': 'Erudit',
         }
         print(mikrotik)
 
@@ -89,7 +89,7 @@ def run_on(message, say):
         # Filter data 
         slack_message = text.split('-')
         unecesasary = slack_message[0].split(' ')
-        unecesasary.remove(event_message)
+        unecesasary.remove("!kit")
         unecesasary.remove("run")
 
         # Set the rest
@@ -137,7 +137,7 @@ def load_file_configuration(message, say, body):
         say("```🟥 Not found your file```")
 
 
-@app.message(event_message)
+@app.message(event_message + 'help')
 def help(say):
     try:
         helpman = [

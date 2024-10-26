@@ -82,7 +82,7 @@ def send_command_to_device_mikrotik(ip:str, command:str):
         'device_type': 'mikrotik_routeros',
         'host': ip,
         'username': 'admin',
-        'password': '',
+        'password': 'Erudit',
     }
 
     first_check = first_check_if_command_is_dangerous(command)
@@ -98,5 +98,6 @@ def send_command_to_device_mikrotik(ip:str, command:str):
 
     elif first_check is False or second_check is False:    
         mikrotik_connect = ConnectHandler(**mikrotik)
-        output = mikrotik_connect.send_command(command, cmd_verify=True, read_timeout=10)
+
+        output = mikrotik_connect.send_command_timing(command, cmd_verify=True, read_timeout=10)
         return output
